@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Panel Principal</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+
+    .card-menu {
+      border: none;
+      border-radius: 15px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .card-menu:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+    .card-menu .icono {
+      font-size: 3rem;
+      color: #0d6efd;
+      margin-bottom: 15px;
+    }
+    .menu-container {
+      min-height: 70vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+
+<body class="bg-light">
+  <!-- Header -->
+  <header class="bg-white shadow-sm p-3 mb-4 d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+      <a th:href="@{/panel}" class="d-flex align-items-center text-decoration-none">
+        <img src="/img/logo.png" alt="Logo" style="height: 40px; margin-right: 15px" />
+        <h5 class="mb-0 text-muted">Panel Principal</h5>
+      </a>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <span class="me-2 text-secondary">Administrador</span>
+      <div class="dropdown">
+        <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+          <img src="/img/usuario.png" alt="usuario" width="32" height="32" class="rounded-circle" />
+        </a>
+        <ul class="dropdown-menu text-small">
+          <li><a class="dropdown-item" th:href="@{/logout}">Cerrar sesión</a></li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Panel de navegación -->
+  <div class="container menu-container">
+    <div class="row g-4 justify-content-center">
+
+      <div class="col-md-3 col-sm-6">
+        <a th:href="@{/dashboard}" class="text-decoration-none">
+          <div class="card card-menu text-center p-4 shadow-sm">
+            <div class="icono"><i class="bi bi-bar-chart-line"></i></div>
+            <h5 class="card-title">Dashboard</h5>
+            <p class="text-muted">Resumen general del sistema</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <a th:href="@{/personas}" class="text-decoration-none">
+          <div class="card card-menu text-center p-4 shadow-sm">
+            <div class="icono"><i class="bi bi-people-fill"></i></div>
+            <h5 class="card-title">Gestión de Personas</h5>
+            <p class="text-muted">Crear, editar y asignar trabajadores</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <a th:href="@{/inventario}" class="text-decoration-none">
+          <div class="card card-menu text-center p-4 shadow-sm">
+            <div class="icono"><i class="bi bi-box-seam"></i></div>
+            <h5 class="card-title">Inventario</h5>
+            <p class="text-muted">Productos, herramientas y materiales</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <a th:href="@{/movimientos}" class="text-decoration-none">
+          <div class="card card-menu text-center p-4 shadow-sm">
+            <div class="icono"><i class="bi bi-arrow-left-right"></i></div>
+            <h5 class="card-title">Movimientos</h5>
+            <p class="text-muted">Entradas, salidas y préstamos</p>
+          </div>
+        </a>
+      </div>
+
+<div class="col-md-3 col-sm-6">
+  <a th:href="@{/productos/faltantes}" class="text-decoration-none">
+    <div class="card card-menu text-center p-4 shadow-sm">
+      <div class="icono"><i class="bi bi-exclamation-triangle-fill "></i></div>
+      <h5 class="card-title">Materiales Faltantes</h5>
+      <p class="text-muted">Stock por debajo del mínimo</p>
+    </div>
+  </a>
+</div>
+
+
+
+      <div class="col-md-3 col-sm-6">
+        <a th:href="@{/asistencia}" class="text-decoration-none">
+          <div class="card card-menu text-center p-4 shadow-sm">
+            <div class="icono"><i class="bi bi-person-check-fill"></i></div>
+            <h5 class="card-title">Asistencia</h5>
+            <p class="text-muted">Entrada, salida y control horario</p>
+          </div>
+        </a>
+      </div>
+
+      <div class="col-md-3 col-sm-6">
+        <a th:href="@{/rendimiento}" class="text-decoration-none">
+          <div class="card card-menu text-center p-4 shadow-sm">
+            <div class="icono"><i class="bi bi-speedometer2"></i></div>
+            <h5 class="card-title">Rendimiento</h5>
+            <p class="text-muted">KPI de trabajadores y rendimiento</p>
+          </div>
+        </a>
+      </div>
+
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

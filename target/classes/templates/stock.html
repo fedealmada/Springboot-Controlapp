@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Control de Stock de Cal</title>
+    <link rel="stylesheet" href="/css/style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
+
+      .dashboard-container {
+        padding: 20px;
+      }
+
+      .card-title {
+        color: #333;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body class="bg-light">
+    <!-- Header -->
+    <header class="bg-white shadow-sm p-3 mb-4 d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center">
+        <a th:href="@{/panel}" style="display: flex; align-items: center; text-decoration: none;">
+          <img src="/img/logo.png" alt="Logo" style="height: 40px; margin-right: 15px" />
+          <h5 class="mb-0 text-muted">Control de Cal</h5>
+        </a>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <span class="me-2 text-secondary">Administrador</span>
+        <div class="dropdown">
+          <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="/img/usuario.png" alt="usuario" width="32" height="32" class="rounded-circle" />
+          </a>
+          <ul class="dropdown-menu text-small">
+            <li><a class="dropdown-item" th:href="@{/logout}">Cerrar sesión</a></li>
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <!-- Contenido del Dashboard -->
+    <div class="container dashboard-container">
+<div class="row g-4">
+  <!-- Gráfico de barras -->
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Distribución de Pallets de Cal por Piso</h5>
+        <canvas id="calChart" width="400" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gráfico de torta -->
+  <div class="col-md-6">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Uso Total de Bolsas de Cal</h5>
+        <canvas id="pieChart" width="400" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+    </div>
+
+    <!-- Script del gráfico -->
+    <script>
+      const ctx = document.getElementById('calChart').getContext('2d');
+      const calChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Piso 1', 'Piso 2', 'Piso 3', 'Piso 4', 'Piso 5', 'Piso 6', 'Piso 7', 'Piso 8', 'Piso 9', 'Piso 10', 'Piso 11', 'Piso 12', 'Piso 13', 'Piso 14'],
+          datasets: [{
+            label: 'Pallets de cal',
+            data: [0, 0, 0, 3, 0, 0, 2, 0, 0, 0, 0, 0, 4, 0],
+            backgroundColor: '#00cba9'
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: {
+                display: true,
+                text: 'Cantidad de Pallets'
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Pisos'
+              }
+            }
+          }
+        }
+      });
+
+
+// Gráfico de torta: bolsas usadas vs disponibles
+const ctxPie = document.getElementById('pieChart').getContext('2d');
+const pieChart = new Chart(ctxPie, {
+  type: 'pie',
+  data: {
+    labels: ['Bolsas Usadas (720)', 'Bolsas Disponibles (480)'],
+    datasets: [{
+      data: [720, 480],
+      backgroundColor: ['#ff6384', '#36a2eb'],
+      borderColor: ['#ffffff', '#ffffff'],
+      borderWidth: 2
+    }]
+  },
+  options: {
+    plugins: {
+      legend: {
+        position: 'bottom'
+      }
+    }
+  }
+});
+
+    </script>
+
+    <!-- Bootstrap JS (para el dropdown) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>
