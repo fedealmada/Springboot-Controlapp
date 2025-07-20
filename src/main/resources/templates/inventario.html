@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Inventario</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+
+  <head>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  </head>
+</head>
+
+<style>
+  body {
+    font-family: 'Inter', sans-serif;
+  }
+</style>
+
+<body class="bg-light">
+  <!-- Header -->
+  <header class="bg-white shadow-sm p-3 mb-4 d-flex justify-content-between align-items-center">
+    <div class="d-flex align-items-center">
+      <a th:href="@{/panel}" style="display: flex; align-items: center; text-decoration: none">
+        <img src="/img/logo.png" alt="Logo" style="height: 40px; margin-right: 15px" />
+        <h5 class="mb-0 text-muted">Inventario</h5>
+      </a>
+    </div>
+    <div class="d-flex align-items-center gap-3">
+      <span class="me-2 text-secondary">Administrador</span>
+      <div class="dropdown">
+        <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown"
+          aria-expanded="false">
+          <img src="/img/usuario.png" alt="usuario" width="32" height="32" class="rounded-circle" />
+        </a>
+        <ul class="dropdown-menu text-small">
+          <li>
+            <a class="dropdown-item" th:href="@{/logout}">Cerrar sesión</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <!-- Filtros -->
+  <div class="container mb-4 position-relative">
+    <form class="row gy-2 gx-3 align-items-center" method="get" th:action="@{/productos}">
+      <div class="col-auto position-relative flex-grow-1">
+        <input type="text" id="buscarProducto" placeholder="Buscar producto..." class="form-control"
+          autocomplete="off" />
+        <ul id="sugerencias" class="list-group position-absolute" style="z-index: 1000; top: 100%; left: 0; right: 0;">
+        </ul>
+      </div>
+
+      <!-- Botón para abrir el modal -->
+      <div class="col-auto ms-auto">
+        <button type="button" class="btn btn-success d-flex align-items-center gap-2" data-bs-toggle="modal"
+          data-bs-target="#modalNuevoProducto">
+          <i class="bi bi-plus-lg"></i> Nuevo Producto
+        </button>
+      </div>
+    </form>
+  </div>
+  <!-- Tabla de Inventario -->
+<div class="container">
+  <div class="card shadow-sm border-0">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">Inventario de Productos</h5>
+    </div>
+    <div class="card-body p-4 bg-white rounded">
+      <div class="table-responsive">
+        <table class="table table-hover table-bordered align-middle rounded overflow-hidden">
+          <thead class="table-light">
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Categoría</th>
+              <th>Descripción</th>
+              <th>Ubicación</th>
+              <th class="text-center">Cantidad</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Se llena dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- Toasts -->
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+    <div id="toastMensaje" class="toast align-items-center text-white bg-success border-0" role="alert"
+      aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="1500">
+      <div class="d-flex">
+        <div class="toast-body" id="toastMensajeTexto">
+          ¡Operación exitosa!
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"
+          aria-label="Cerrar"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para ver producto -->
+  <div class="modal fade" id="modalVerProducto" tabindex="-1" aria-labelledby="modalVerProductoLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Detalle del Producto</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Nombre:</strong> <span id="verNombre"></span></p>
+          <p>
+            <strong>Descripción:</strong> <span id="verDescripcion"></span>
+          </p>
+          <p><strong>Stock:</strong> <span id="verStock"></span></p>
+          <p><strong>Stock mínimo:</strong> <span id="verStockMinimo"></span></p>
+          <p><strong>Ubicación:</strong> <span id="verUbicacion"></span></p>
+          <p><strong>Tipo:</strong> <span id="verTipo"></span></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para crear producto -->
+  <div class="modal fade" id="modalNuevoProducto" tabindex="-1" aria-labelledby="modalNuevoProductoLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="formNuevoProducto">
+          <div class="modal-header">
+            <h5 class="modal-title">Nuevo Producto</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label for="nombre" class="form-label">Nombre</label>
+              <input type="text" class="form-control" id="nombre" name="nombre" required />
+            </div>
+            <div class="mb-3">
+              <label for="descripcion" class="form-label">Descripción</label>
+              <input type="text" class="form-control" id="descripcion" name="descripcion" required />
+            </div>
+            <div class="mb-3">
+              <label for="stock" class="form-label">Cantidad</label>
+              <input type="number" class="form-control" id="stock" name="stock" required min="0" />
+            </div>
+
+            <div class="mb-3">
+              <label for="stockMinimo" class="form-label">Stock mínimo</label>
+              <input type="number" class="form-control" id="stockMinimo" name="stockMinimo" required min="0" />
+            </div>
+
+            <div class="mb-3">
+              <label for="ubicacion" class="form-label">Ubicación</label>
+              <input type="text" class="form-control" id="ubicacion" name="ubicacion" required />
+            </div>
+            <div class="mb-3">
+              <label for="tipo" class="form-label">Tipo</label>
+              <input type="text" class="form-control" id="tipo" name="tipo" required />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para editar producto -->
+  <div class="modal fade" id="modalEditarProducto" tabindex="-1" aria-labelledby="modalEditarProductoLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="formEditarProducto">
+          <div class="modal-header">
+            <h5 class="modal-title">Editar Producto</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="editarId" name="id" />
+            <div class="mb-3">
+              <label for="editarNombre" class="form-label">Nombre</label>
+              <input type="text" class="form-control" id="editarNombre" name="nombre" required />
+            </div>
+            <div class="mb-3">
+              <label for="editarDescripcion" class="form-label">Descripción</label>
+              <input type="text" class="form-control" id="editarDescripcion" name="descripcion" required />
+            </div>
+            <div class="mb-3">
+              <label for="editarStock" class="form-label">Cantidad</label>
+              <input type="number" class="form-control" id="editarStock" name="stock" required min="0" />
+            </div>
+
+            <div class="mb-3">
+              <label for="editarStockMinimo" class="form-label">Stock mínimo</label>
+              <input type="number" class="form-control" id="editarStockMinimo" name="stockMinimo" required min="0" />
+            </div>
+
+            <div class="mb-3">
+              <label for="editarUbicacion" class="form-label">Ubicación</label>
+              <input type="text" class="form-control" id="editarUbicacion" name="ubicacion" required />
+            </div>
+            <div class="mb-3">
+              <label for="editarTipo" class="form-label">Tipo</label>
+              <input type="text" class="form-control" id="editarTipo" name="tipo" required />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Nuevo producto - enviar formulario
+    document
+      .getElementById("formNuevoProducto")
+      .addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const producto = {
+          nombre: document.getElementById("nombre").value.trim(),
+          tipo: document.getElementById("tipo").value.trim(),
+          descripcion: document.getElementById("descripcion").value.trim(),
+          stock: parseInt(document.getElementById("stock").value),
+          stockMinimo: parseInt(document.getElementById("stockMinimo").value),
+          ubicacion: document.getElementById("ubicacion").value.trim(),
+        };
+
+        fetch("/api/productos", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(producto),
+        })
+          .then((response) => {
+            if (!response.ok) throw new Error("Error al guardar");
+            return response.json();
+          })
+          .then(() => {
+            const modal = bootstrap.Modal.getInstance(
+              document.getElementById("modalNuevoProducto")
+            );
+            modal.hide();
+
+            e.target.reset();
+
+            location.reload();
+          })
+          .catch((error) => {
+            alert("Ocurrió un error al guardar el producto.");
+            console.error(error);
+          });
+      });
+
+    // Ver producto
+    function verProducto(id) {
+      fetch("/api/productos/" + id)
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById("verNombre").textContent = data.nombre;
+          document.getElementById("verDescripcion").textContent = data.descripcion;
+          document.getElementById("verStock").textContent = data.stock;
+          document.getElementById("verStockMinimo").textContent = data.stockMinimo;  // aquí
+          document.getElementById("verUbicacion").textContent = data.ubicacion;
+          document.getElementById("verTipo").textContent = data.tipo;
+
+          const modal = new bootstrap.Modal(
+            document.getElementById("modalVerProducto")
+          );
+          modal.show();
+        })
+        .catch((error) => {
+          console.error(error);
+          mostrarToast("Error al obtener producto", true);
+        });
+    }
+
+    // Abrir modal editar
+    function abrirModalEditar(id) {
+      fetch("/api/productos/" + id)
+        .then((response) => {
+          if (!response.ok) throw new Error("No se pudo obtener el producto");
+          return response.json();
+        })
+        .then((data) => {
+          document.getElementById("editarId").value = data.id;
+          document.getElementById("editarNombre").value = data.nombre;
+          document.getElementById("editarDescripcion").value = data.descripcion;
+          document.getElementById("editarStock").value = data.stock;
+          document.getElementById("editarStockMinimo").value = data.stockMinimo;
+          document.getElementById("editarUbicacion").value = data.ubicacion;
+          document.getElementById("editarTipo").value = data.tipo;
+
+          const modal = new bootstrap.Modal(
+            document.getElementById("modalEditarProducto")
+          );
+          modal.show();
+        })
+        .catch((error) => {
+          mostrarToast("Error al cargar producto", true);
+          console.error(error);
+        });
+    }
+
+    // Editar producto - enviar formulario
+    document
+      .getElementById("formEditarProducto")
+      .addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        const id = document.getElementById("editarId").value;
+        const producto = {
+          nombre: document.getElementById("editarNombre").value.trim(),
+          descripcion: document.getElementById("editarDescripcion").value.trim(),
+          stock: parseInt(document.getElementById("editarStock").value),
+          stockMinimo: parseInt(document.getElementById("editarStockMinimo").value),
+          ubicacion: document.getElementById("editarUbicacion").value.trim(),
+          tipo: document.getElementById("editarTipo").value.trim(),
+        };
+
+        fetch("/api/productos/" + id, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(producto),
+        })
+          .then((response) => {
+            if (!response.ok) throw new Error("Error al actualizar");
+            return response.json();
+          })
+          .then((productoActualizado) => {
+            mostrarToast("Producto actualizado correctamente");
+
+            const fila = document.getElementById(
+              "producto-" + productoActualizado.id
+            );
+            if (fila) {
+              fila.querySelector("td:nth-child(2)").textContent =
+                productoActualizado.nombre;
+              fila.querySelector("td:nth-child(3)").textContent =
+                productoActualizado.tipo;
+              fila.querySelector("td:nth-child(4)").textContent =
+                productoActualizado.stock;
+            }
+
+            const modalEditar = bootstrap.Modal.getInstance(
+              document.getElementById("modalEditarProducto")
+            );
+            if (modalEditar) modalEditar.hide();
+
+            location.reload();
+          })
+          .catch((error) => {
+            mostrarToast("Error al actualizar producto", true);
+            console.error(error);
+          });
+      });
+
+    // Eliminar producto
+    function eliminarProducto(id) {
+      if (!confirm("¿Seguro que deseas eliminar este producto?")) return;
+
+      fetch("/api/productos/" + id, {
+        method: "DELETE",
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error("Error al eliminar");
+          mostrarToast("Producto eliminado correctamente");
+          // Remover fila de tabla
+          const fila = document.getElementById("producto-" + id);
+          if (fila) fila.remove();
+        })
+        .catch((error) => {
+          mostrarToast("Error al eliminar producto", true);
+          console.error(error);
+        });
+    }
+
+    // Mostrar toast
+    function mostrarToast(mensaje, error = false) {
+      const toastEl = document.getElementById("toastMensaje");
+      const toastBody = document.getElementById("toastMensajeTexto");
+      toastBody.textContent = mensaje;
+      if (error) {
+        toastEl.classList.remove("bg-success");
+        toastEl.classList.add("bg-danger");
+      } else {
+        toastEl.classList.remove("bg-danger");
+        toastEl.classList.add("bg-success");
+      }
+      const toast = new bootstrap.Toast(toastEl);
+      toast.show();
+    }
+
+
+    document.getElementById("buscarProducto").addEventListener("input", function () {
+      const query = this.value.trim();
+      const tbody = document.querySelector("table tbody");
+
+      if (query.length < 2) {
+        fetchTodosLosProductos(); // 👈 Restaurar productos completos
+        return;
+      }
+
+      fetch(`http://localhost:8080/api/productos/buscar?nombre=${encodeURIComponent(query)}`)
+        .then(response => response.json())
+        .then(data => {
+          actualizarTabla(data);
+        })
+        .catch(error => {
+          console.error("Error al buscar productos:", error);
+        });
+    });
+
+    // 👉 Esta función trae todos los productos
+    function fetchTodosLosProductos() {
+      fetch("http://localhost:8080/api/productos")
+        .then(response => response.json())
+        .then(data => {
+          actualizarTabla(data);
+        })
+        .catch(error => {
+          console.error("Error al cargar todos los productos:", error);
+        });
+    }
+    function actualizarTabla(data) {
+      const tbody = document.querySelector("table tbody");
+      tbody.innerHTML = "";
+
+      if (data.length === 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td colspan="5" class="text-center">No se encontraron productos.</td>
+        `;
+        tbody.appendChild(row);
+        return;
+      }
+
+      
+      data.forEach(producto => {
+        const stockClass = producto.stock <= producto.stockMinimo ? 'text-danger' : 'text-success';
+
+        const row = document.createElement("tr");
+        row.setAttribute("id", `producto-${producto.id}`);
+        row.innerHTML = `
+        <td>${producto.id}</td>
+        <td>${producto.nombre}</td>
+        <td>${producto.tipo}</td>
+        <td>${producto.descripcion || "-"}</td> <!-- Nueva columna -->
+        <td>${producto.ubicacion || "-"}</td>   <!-- Nueva columna -->
+        <td>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-sm btn-secondary" onclick="modificarStock(${producto.id}, -1)">-</button>
+                <span id="stock-${producto.id}" class="${stockClass}">${producto.stock}</span>
+                <button type="button" class="btn btn-sm btn-secondary" onclick="modificarStock(${producto.id}, 1)">+</button>
+            </div>
+        </td>
+        <td>
+            <div class="d-flex gap-1">
+                <button type="button" class="btn btn-sm btn-primary text-white" onclick="verProducto(${producto.id})" title="Ver">
+                    <i class="bi bi-eye-fill"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-warning text-white" onclick="abrirModalEditar(${producto.id})" title="Editar">
+                    <i class="bi bi-pencil-fill"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-danger" onclick="eliminarProducto(${producto.id})" title="Eliminar">
+                    <i class="bi bi-trash-fill"></i>
+                </button>
+            </div>
+        </td>
+    `;
+        tbody.appendChild(row);
+      });
+    }
+    // 👉 Mostrar todos los productos al cargar la página
+    window.addEventListener("load", fetchTodosLosProductos);
+
+    document.getElementById("buscarProducto").addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault(); // Evita que se envíe el formulario o se recargue la página
+      }
+    });
+
+    function modificarStock(id, delta) {
+      const stockSpan = document.getElementById(`stock-${id}`);
+      const currentStock = parseInt(stockSpan.textContent);
+      const nuevoStock = Math.max(currentStock + delta, 0);
+
+      // Primero obtenemos el producto actual completo
+      fetch(`/api/productos/${id}`)
+        .then(res => {
+          if (!res.ok) throw new Error("No se pudo obtener el producto");
+          return res.json();
+        })
+        .then(producto => {
+          // Modificamos el stock y enviamos todo de nuevo
+          producto.stock = nuevoStock;
+
+          return fetch(`/api/productos/${id}`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(producto),
+          });
+        })
+        .then(res => {
+          if (!res.ok) throw new Error("Error al modificar stock");
+          return res.json();
+        })
+        .then(data => {
+          stockSpan.textContent = data.stock;
+          stockSpan.className = data.stock <= data.stockMinimo ? 'text-danger' : 'text-success';
+          mostrarToast("Stock actualizado");
+        })
+        .catch(err => {
+          console.error(err);
+          mostrarToast("Error al actualizar stock", true);
+        });
+    }
+
+  </script>
+</body>
+
+</html>
